@@ -44,20 +44,19 @@ resource "aws_dynamodb_table" "kc_table" {
 }
 
 #####################################################
-# Lambda 関数
-# - ファイルを zip 化し、それをデプロイ
+# Lambda 関数 (FastAPI + Mangum)
 #####################################################
 # アーカイブ (zip) を作成
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_file = "lambda_function.py"
-  output_path = "lambda_function.zip"
+  source_file = "main.py"               # FastAPI コードを含むファイル
+  output_path = "main.zip"
 }
 
 resource "aws_lambda_function" "kc_lambda" {
   function_name = "kc-lambda-function"
   runtime       = "python3.9"
-  handler       = "lambda_function.lambda_handler"
+  handler       = "main.handler"        # FastAPI + Mangum のハンドラ
   role          = aws_iam_role.lambda_role.arn
   filename      = data.archive_file.lambda_zip.output_path
 
