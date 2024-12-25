@@ -23,10 +23,10 @@ resource "aws_iam_role" "lambda_role" {
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role_policy.json
 }
 
-# Lambda が CloudWatch Logs などにアクセスできるようにするために基本ポリシーをアタッチ
+# ここで AWSLambdaBasicExecutionRole (マネージドポリシー) をアタッチ
 resource "aws_iam_role_policy_attachment" "lambda_basic_execution_role" {
   role       = aws_iam_role.lambda_role.name
-  policy_arn = "arn:aws:iam::aws:policy/AWSLambdaBasicExecutionRole"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
 }
 
 #####################################################
