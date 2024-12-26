@@ -49,7 +49,7 @@ resource "aws_dynamodb_table" "kc_table" {
 # アーカイブ (zip) を作成
 data "archive_file" "lambda_zip" {
   type        = "zip"
-  source_file = "main.py"               # FastAPI コードを含むファイル
+  source_file = "main.zip"               # FastAPI コードを含むファイル
   output_path = "main.zip"
 }
 
@@ -58,7 +58,7 @@ resource "aws_lambda_function" "kc_lambda" {
   runtime       = "python3.9"
   handler       = "main.handler"        # FastAPI + Mangum のハンドラ
   role          = aws_iam_role.lambda_role.arn
-  filename      = data.archive_file.lambda_zip.output_path
+  filename      = "main.zip"
 
   # DynamoDB テーブル名を環境変数で渡す例
   environment {
