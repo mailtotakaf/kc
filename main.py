@@ -5,25 +5,27 @@ import os
 
 app = FastAPI()
 
+# 環境変数から DynamoDB のテーブル名を取得
+TABLE_NAME = os.environ.get("TABLE_NAME")
+
 @app.get("/items")
 def get_items():
-    # DynamoDB アクセス例
+    # DynamoDB のリソースを取得
     dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(os.environ["TABLE_NAME"])
+    table = dynamodb.Table(TABLE_NAME)
 
-    # テーブルから一部アイテムを取得するなど
-    # 簡単のため静的レスポンス
+    # サンプルレスポンスとして DynamoDB を参照する例
     return {"message": "Hello from FastAPI + Lambda + DynamoDB"}
 
 @app.post("/items")
 def create_item(item: dict):
     dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(os.environ["TABLE_NAME"])
+    table = dynamodb.Table(TABLE_NAME)
 
-    # POST された内容をアイテムとして DynamoDB に書き込む
+    # POSTされたアイテムをDynamoDBに書き込む
     table.put_item(Item=item)
 
     return {"result": "Item created!"}
 
-# Lambda との接続を行う Mangum ハンドラ
+# Mangum ハンドラを定義
 handler = Mangum(app)
