@@ -1,14 +1,39 @@
-#####################################################
-# プロバイダ設定
-#####################################################
-provider "aws" {
-  region = "us-east-1"
+########################################
+# Terraform および AWS プロバイダの設定
+########################################
+terraform {
+  required_version = ">= 1.3.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+  }
 }
 
-#####################################################
-# IAM ロール (Lambda 用)
-#####################################################
-data "aws_iam_policy_document" "lambda_assume_role_policy" {
+provider "aws" {
+  region = "ap-northeast-1"  # 必要に応じて変更
+}
+
+########################################
+# DynamoDB テーブル
+########################################
+resource "aws_dynamodb_table" "example" {
+  name         = "example-table"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "id"
+
+  attribute {
+    name = "id"
+    type = "S"
+  }
+}
+
+########################################
+# Lambda 実行ロール & ポリシー
+########################################
+data "aws_iam_policy_document" "lambda_trust" {
   statement {
     actions = ["sts:AssumeRole"]
     principals {
@@ -18,112 +43,102 @@ data "aws_iam_policy_document" "lambda_assume_role_policy" {
   }
 }
 
-resource "aws_iam_role" "lambda_role" {
-  name               = "kc-lambda-role"
-  assume_role_policy = data.aws_iam_policy_document.lambda_assume_role_policy.json
+resource "aws_iam_role" "lambda_execution_role" {
+  name               = "lambda_execution_role"
+  assume_role_policy = data.aws_iam_policy_document.lambda_trust.json
 }
 
-# ここで AWSLambdaBasicExecutionRole (マネージドポリシー) をアタッチ
-resource "aws_iam_role_policy_attachment" "lambda_basic_execution_role" {
-  role       = aws_iam_role.lambda_role.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
-}
-
-#####################################################
-# DynamoDB テーブル
-#####################################################
-resource "aws_dynamodb_table" "kc_table" {
-  name           = "kc-table"
-  billing_mode   = "PAY_PER_REQUEST"
-  hash_key       = "id"
-
-  attribute {
-    name = "id"
-    type = "S"
+# Lambda から DynamoDB へアクセスするためのポリシー
+data "aws_iam_policy_document" "lambda_policy" {
+  statement {
+    actions = [
+      "dynamodb:PutItem",
+      "dynamodb:GetItem",
+      "dynamodb:UpdateItem",
+      "dynamodb:DeleteItem",
+      "dynamodb:Scan",
+      "dynamodb:Query"
+    ]
+    resources = [
+      aws_dynamodb_table.example.arn
+    ]
   }
 }
 
-#####################################################
-# Lambda 関数 (FastAPI + Mangum)
-#####################################################
-# アーカイブ (zip) を作成
-data "archive_file" "lambda_zip" {
-  type        = "zip"
-  source_file = "main.zip"               # FastAPI コードを含むファイル
-  output_path = "main.zip"
+resource "aws_iam_role_policy" "lambda_policy" {
+  name = "lambda_dynamodb_policy"
+  role = aws_iam_role.lambda_execution_role.id
+  policy = data.aws_iam_policy_document.lambda_policy.json
 }
 
-resource "aws_lambda_function" "kc_lambda" {
-  function_name = "kc-lambda-function"
+########################################
+# Lambda 関数
+########################################
+resource "aws_lambda_function" "example" {
+  function_name = "example-lambda"
+  role          = aws_iam_role.lambda_execution_role.arn
+  handler       = "lambda_function.lambda_handler"
   runtime       = "python3.9"
-  handler       = "main.handler"        # FastAPI + Mangum のハンドラ
-  role          = aws_iam_role.lambda_role.arn
-  filename      = "main.zip"
 
-  # DynamoDB テーブル名を環境変数で渡す例
-  environment {
-    variables = {
-      TABLE_NAME = aws_dynamodb_table.kc_table.name
-    }
-  }
+  # あらかじめ zip 化したファイルを指定
+  filename         = "lambda_function.zip"
+  source_code_hash = filebase64sha256("lambda_function.zip")
+
+  # (オプション) Lambdaに環境変数を設定する場合
+  # environment {
+  #   variables = {
+  #     TABLE_NAME = aws_dynamodb_table.example.name
+  #   }
+  # }
 }
 
-#####################################################
+########################################
 # API Gateway
-# - リソース定義、メソッド定義、Lambda 連携
-#####################################################
-# REST API 作成
-resource "aws_api_gateway_rest_api" "kc_api" {
-  name        = "kc-api"
-  description = "kc API with Lambda & DynamoDB"
+########################################
+resource "aws_api_gateway_rest_api" "example" {
+  name        = "example-api"
+  description = "Example API for demonstration"
 }
 
-# パス /items を作成
-resource "aws_api_gateway_resource" "kc_resource" {
-  rest_api_id = aws_api_gateway_rest_api.kc_api.id
-  parent_id   = aws_api_gateway_rest_api.kc_api.root_resource_id
-  path_part   = "items"
+# /example というリソースを作成
+resource "aws_api_gateway_resource" "example_resource" {
+  rest_api_id = aws_api_gateway_rest_api.example.id
+  parent_id   = aws_api_gateway_rest_api.example.root_resource_id
+  path_part   = "example"
 }
 
-# メソッド (GET) を作成 (AUTH 無し)
-resource "aws_api_gateway_method" "kc_method" {
-  rest_api_id   = aws_api_gateway_rest_api.kc_api.id
-  resource_id   = aws_api_gateway_resource.kc_resource.id
+# GET /example メソッド
+resource "aws_api_gateway_method" "example_method" {
+  rest_api_id   = aws_api_gateway_rest_api.example.id
+  resource_id   = aws_api_gateway_resource.example_resource.id
   http_method   = "GET"
   authorization = "NONE"
 }
 
-# API Gateway と Lambda を統合 (AWS_PROXY モード)
-resource "aws_api_gateway_integration" "kc_integration" {
-  rest_api_id             = aws_api_gateway_rest_api.kc_api.id
-  resource_id             = aws_api_gateway_resource.kc_resource.id
-  http_method             = aws_api_gateway_method.kc_method.http_method
-  integration_http_method = "POST"  # Lambda呼び出し時の method
+# Lambda を AWS_PROXY で呼び出す設定
+resource "aws_api_gateway_integration" "example_integration" {
+  rest_api_id             = aws_api_gateway_rest_api.example.id
+  resource_id             = aws_api_gateway_resource.example_resource.id
+  http_method             = aws_api_gateway_method.example_method.http_method
+  integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = aws_lambda_function.kc_lambda.invoke_arn
+  uri                     = aws_lambda_function.example.invoke_arn
 }
 
-# API Gateway から Lambda を呼び出せるようにする権限
-resource "aws_lambda_permission" "apigw_permission" {
+# デプロイ
+resource "aws_api_gateway_deployment" "example_deployment" {
+  depends_on = [
+    aws_api_gateway_integration.example_integration
+  ]
+  rest_api_id = aws_api_gateway_rest_api.example.id
+  stage_name  = "dev"
+}
+
+# Lambda への実行権限をAPI Gatewayに付与
+resource "aws_lambda_permission" "api_gateway_invoke" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.kc_lambda.function_name
+  function_name = aws_lambda_function.example.function_name
   principal     = "apigateway.amazonaws.com"
-  # execution_arn に対してワイルドカード指定
-  source_arn    = "${aws_api_gateway_rest_api.kc_api.execution_arn}/*/*"
-}
-
-# デプロイメント作成
-resource "aws_api_gateway_deployment" "kc_deployment" {
-  rest_api_id = aws_api_gateway_rest_api.kc_api.id
-  depends_on = [
-    aws_api_gateway_integration.kc_integration,
-  ]
-}
-
-# ステージ作成
-resource "aws_api_gateway_stage" "kc_stage" {
-  rest_api_id   = aws_api_gateway_rest_api.kc_api.id
-  deployment_id = aws_api_gateway_deployment.kc_deployment.id
-  stage_name    = "dev"
+  source_arn    = aws_api_gateway_deployment.example_deployment.execution_arn
 }
