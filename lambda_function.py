@@ -1,27 +1,39 @@
 import json
-import boto3
-import os
-
-dynamodb = boto3.resource('dynamodb')
-# テーブル名を環境変数から取得する場合など
-# table_name = os.environ['TABLE_NAME']
-# table = dynamodb.Table(table_name)
-# 今回は固定的にテーブルを指定
-table = dynamodb.Table('example-table')
 
 def lambda_handler(event, context):
-    # クエリパラメータなどの取得例
-    # query_params = event.get("queryStringParameters", {})
+    # リクエストボディを解析
+    try:
+        body = json.loads(event['body'])
+    except (KeyError, json.JSONDecodeError):
+        return {
+            "statusCode": 400,
+            "body": json.dumps({"error": "Invalid request body"})
+        }
 
-    # DynamoDBへの読み書きの例
-    # table.put_item(Item={"id": "123", "value": "Hello DynamoDB"})
-    # response = table.get_item(Key={"id": "123"})
-    # item = response.get("Item")
+    # 必要なパラメータを取得
+    param1 = body.get('param1')
+    param2 = body.get('param2')
+    param3 = body.get('param3')
+    print("param1:", param1)
+    print("param2:", param2)
+    print("param3:", param3)
 
+    # パラメータが揃っているか確認
+    if not all([param1, param2, param3]):
+        return {
+            "statusCode": 400,
+            "body": json.dumps({"error": "Missing one or more required parameters: param1, param2, param3"})
+        }
+
+    # ロジックを実行（例: param1 + param2, param3 を計算）
+    result1 = f"{param1}-{param2}"  # 単純な例: パラメータを結合
+    result2 = len(param3)  # param3 の長さを計算
+
+    # レスポンスを返す
     return {
         "statusCode": 200,
         "body": json.dumps({
-            "message": "Hello from Lambda!",
-            # "item": item
+            "result1": result1,
+            "result2": result2
         })
     }

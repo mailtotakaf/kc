@@ -103,7 +103,7 @@ resource "aws_api_gateway_resource" "example_resource" {
 resource "aws_api_gateway_method" "example_method" {
   rest_api_id   = aws_api_gateway_rest_api.example.id
   resource_id   = aws_api_gateway_resource.example_resource.id
-  http_method   = "GET"
+  http_method   = "POST"
   authorization = "NONE"
 }
 
