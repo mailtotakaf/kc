@@ -1,24 +1,12 @@
-########################################
-# Terraform および AWS プロバイダの設定
-########################################
-terraform {
-  required_version = ">= 1.3.0"
-
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
+variable "region" {
+  description = "AWS Region for the resources"
+  default     = "ap-northeast-1" # 必要に応じて変更
 }
 
 provider "aws" {
-  region = "ap-northeast-1"  # 必要に応じて変更
+  region = var.region
 }
 
-########################################
-# DynamoDB テーブル
-########################################
 resource "aws_dynamodb_table" "example" {
   name         = "example-table"
   billing_mode = "PAY_PER_REQUEST"
@@ -30,9 +18,6 @@ resource "aws_dynamodb_table" "example" {
   }
 }
 
-########################################
-# Lambda 実行ロール & ポリシー
-########################################
 data "aws_iam_policy_document" "lambda_trust" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -48,7 +33,6 @@ resource "aws_iam_role" "lambda_execution_role" {
   assume_role_policy = data.aws_iam_policy_document.lambda_trust.json
 }
 
-# Lambda から DynamoDB と CloudWatch Logs にアクセスするためのポリシー
 data "aws_iam_policy_document" "lambda_policy" {
   statement {
     actions = [
@@ -75,17 +59,11 @@ resource "aws_iam_role_policy" "lambda_policy" {
   policy = data.aws_iam_policy_document.lambda_policy.json
 }
 
-########################################
-# CloudWatch Log Group
-########################################
 resource "aws_cloudwatch_log_group" "lambda_log_group" {
   name              = "/aws/lambda/example-lambda"
-  retention_in_days = 7  # 必要に応じて日数を変更
+  retention_in_days = 7
 }
 
-########################################
-# Lambda 関数
-########################################
 resource "aws_lambda_function" "example" {
   function_name = "example-lambda"
   role          = aws_iam_role.lambda_execution_role.arn
@@ -94,6 +72,4 @@ resource "aws_lambda_function" "example" {
 
   filename         = "lambda_function.zip"
   source_code_hash = filebase64sha256("lambda_function.zip")
-
-  # CloudWatchのログ出力を明示する必要はなく、AWSが自動的に設定
 }
