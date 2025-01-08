@@ -1,39 +1,44 @@
 import json
+import kc_checker
+
 
 def lambda_handler(event, context):
     # リクエストボディを解析
     try:
-        body = json.loads(event['body'])
+        stones = json.loads(event['stones'])
     except (KeyError, json.JSONDecodeError):
         return {
             "statusCode": 400,
-            "body": json.dumps({"error": "Invalid request body"})
+            "stones": json.dumps({"error": "Invalid request stones"})
         }
 
     # 必要なパラメータを取得
-    param1 = body.get('param1')
-    param2 = body.get('param2')
-    param3 = body.get('param3')
-    print("param1:", param1)
-    print("param2:", param2)
-    print("param3:", param3)
+    stone0 = stones.get('0')
+    stone1 = stones.get('1')
+    stone2 = stones.get('2')
+    stone3 = stones.get('3')
+    print("stone0:", stone0)
+    print("stone1:", stone1)
+    print("stone2:", stone2)
+    print("stone3:", stone3)
 
     # パラメータが揃っているか確認
-    if not all([param1, param2, param3]):
+    if not all([stone0, stone1, stone2, stone3]):
         return {
             "statusCode": 400,
-            "body": json.dumps({"error": "Missing one or more required parameters: param1, param2, param3"})
+            "stones": json.dumps({"error": "Missing one or more required parameters: stone0, stone1, stone2, stone3"})
         }
 
-    # ロジックを実行（例: param1 + param2, param3 を計算）
-    result1 = f"{param1}-{param2}"  # 単純な例: パラメータを結合
-    result2 = len(param3)  # param3 の長さを計算
+    kc_checker.alert_on_square_or_pre_square(stones)
+    # # ロジックを実行（例: stone0 + stone1, stone2 を計算）
+    # result1 = f"{stone0}-{stone1}"  # 単純な例: パラメータを結合
+    # result2 = len(stone2)  # stone2 の長さを計算
 
-    # レスポンスを返す
-    return {
-        "statusCode": 200,
-        "body": json.dumps({
-            "result1": result1,
-            "result2": result2
-        })
-    }
+    # # レスポンスを返す
+    # return {
+    #     "statusCode": 200,
+    #     "stones": json.dumps({
+    #         "result1": result1,
+    #         "result2": result2
+    #     })
+    # }
