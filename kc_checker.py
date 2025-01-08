@@ -26,7 +26,7 @@ def alert_on_square_or_pre_square(stones):
             new_positions = remaining_stones + [move]
             if is_square(new_positions):
                 print("アラート: 次の1手で正方形になります!", new_positions)
-                return
+                return True
 
             # 1手前の状態を確認
             for j, check_stone in enumerate(remaining_stones):
@@ -35,12 +35,13 @@ def alert_on_square_or_pre_square(stones):
                     pre_new_positions = pre_remaining_stones + [pre_move] + [move]
                     if is_square(pre_new_positions):
                         print("アラート: 正方形1手前です!", pre_new_positions)
-                        return
+                        return True
     print("問題なし")
+    return False
 
 
-# 碁石の初期配置
-stones = [(0, 0), (0, 1), (1, 0), (2, 2)]
+# # 碁石の初期配置
+# stones = [(0, 0), (0, 1), (1, 0), (2, 2)]
 
-# アラートチェック
-alert_on_square_or_pre_square(stones)
+# # アラートチェック
+# alert_on_square_or_pre_square(stones)

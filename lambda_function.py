@@ -29,7 +29,11 @@ def lambda_handler(event, context):
             "stones": json.dumps({"error": "Missing one or more required parameters: stone0, stone1, stone2, stone3"})
         }
 
-    kc_checker.alert_on_square_or_pre_square(stones)
+    riichi_flg = kc_checker.alert_on_square_or_pre_square(stones)
+    return {
+        "statusCode": 200,
+        "riichi_flg": riichi_flg
+    }
     # # ロジックを実行（例: stone0 + stone1, stone2 を計算）
     # result1 = f"{stone0}-{stone1}"  # 単純な例: パラメータを結合
     # result2 = len(stone2)  # stone2 の長さを計算
