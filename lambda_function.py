@@ -13,10 +13,10 @@ def lambda_handler(event, context):
         }
 
     # 必要なパラメータを取得
-    stone0 = stones.get('0')
-    stone1 = stones.get('1')
-    stone2 = stones.get('2')
-    stone3 = stones.get('3')
+    stone0 = stones.get('stone0')
+    stone1 = stones.get('stone1')
+    stone2 = stones.get('stone2')
+    stone3 = stones.get('stone3')
     print("stone0:", stone0)
     print("stone1:", stone1)
     print("stone2:", stone2)
@@ -29,7 +29,11 @@ def lambda_handler(event, context):
             "stones": json.dumps({"error": "Missing one or more required parameters: stone0, stone1, stone2, stone3"})
         }
 
-    riichi_flg = kc_checker.alert_on_square_or_pre_square(stones)
+    # stones_tuple = [(item["x"], item["y"]) for item in stones]
+    # stones_tuple = [(item["x"], item["y"]) for i, item.get("stone") in enumerate(stones)]
+    stones_tuple = [(item["x"], item["y"]) for i, (key, item) in enumerate(stones.items())]
+    print("stones_tuple:", stones_tuple)
+    riichi_flg = kc_checker.alert_on_square_or_pre_square(stones_tuple)
     return {
         "statusCode": 200,
         "riichi_flg": riichi_flg
