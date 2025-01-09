@@ -1,15 +1,6 @@
 from itertools import combinations, product
 
 
-# def is_square(points):
-#     # 点の組み合わせから正方形かどうかを判定する
-#     if len(points) != 4:
-#         return False
-
-#     # 距離を全て計算する
-#     distances = sorted((abs(x1 - x2)**2 + abs(y1 - y2)**2) for (x1, y1), (x2, y2) in combinations(points, 2))
-#     return distances[0] > 0 and distances[0] == distances[1] == distances[2] == distances[3] and distances[4] == distances[5]
-
 def is_square(points):
     # 4点でない場合は正方形にはなりえない
     if len(points) != 4:
@@ -36,26 +27,21 @@ def generate_possible_moves(point):
 
 def alert_on_square_or_pre_square(stones):
     if is_square(stones):
-        print("アラート: 正方形です!", stones)
-        return True
+        print("積み（正方形）です!", stones)
+        return 2
 
     for i, stone in enumerate(stones):
         # 現在の碁石配置
         remaining_stones = stones[:i] + stones[i+1:]
         # 動かした場合の全ての可能性
         for move in generate_possible_moves(stone):
-            # new_positions = remaining_stones + [move]
-            # if is_square(new_positions):
-            #     print("アラート: 正方形です!", new_positions)
-            #     return True
-
             # 1手前の状態を確認
             for j, check_stone in enumerate(remaining_stones):
                 pre_remaining_stones = remaining_stones[:j] + remaining_stones[j+1:]
                 for pre_move in generate_possible_moves(check_stone):
                     pre_new_positions = pre_remaining_stones + [pre_move] + [move]
                     if is_square(pre_new_positions):
-                        print("アラート: 正方形1手前です!", pre_new_positions)
-                        return True
-    print("問題なし")
-    return False
+                        print("リーチ!", pre_new_positions)
+                        return 1
+    # print("問題なし")
+    return 0
