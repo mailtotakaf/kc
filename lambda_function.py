@@ -5,7 +5,7 @@ import kc_checker
 def lambda_handler(event, context):
     # リクエストボディを解析
     try:
-        stones = json.loads(event['stones'])
+        stones = json.loads(event['body'])
     except (KeyError, json.JSONDecodeError):
         return {
             "statusCode": 400,
