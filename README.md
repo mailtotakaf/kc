@@ -91,3 +91,13 @@ POSTでリクエストを送信
 ![alt text](image-1.png)
 
 ---
+
+## Swagger EditerでAPI仕様確認
+
+https://editor.swagger.io/
+\
+に swagger.yml を貼り付けて確認
+
+---
+## Git Hub
+
