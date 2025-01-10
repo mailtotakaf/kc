@@ -31,17 +31,18 @@ def alert_on_square_or_pre_square(stones):
         return 2
 
     for i, stone in enumerate(stones):
-        # 現在の碁石配置
+        # 現在の碁石配置（動かす石を除外）
         remaining_stones = stones[:i] + stones[i+1:]
+
         # 動かした場合の全ての可能性
         for move in generate_possible_moves(stone):
-            # 1手前の状態を確認
-            for j, check_stone in enumerate(remaining_stones):
-                pre_remaining_stones = remaining_stones[:j] + remaining_stones[j+1:]
-                for pre_move in generate_possible_moves(check_stone):
-                    pre_new_positions = pre_remaining_stones + [pre_move] + [move]
-                    if is_square(pre_new_positions):
-                        print("リーチ!", pre_new_positions)
-                        return 1
-    # print("問題なし")
+            # 新しい配置を計算
+            new_positions = remaining_stones + [move]
+
+            # 正方形になるかどうかをチェック
+            if is_square(new_positions):
+                print("リーチ!", new_positions)
+                return 1
+
+    # print("アラートなし")
     return 0
