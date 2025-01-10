@@ -6,9 +6,7 @@ info:
 paths:
   /dev/example:
     post:
-      # summary: Process stones data
       description: Returns "kc_flg" based on the positions of 4 stones.
-      # operationId: processStones
       requestBody:
         required: true
         content:
@@ -112,6 +110,30 @@ paths:
                   summary: 積み時
                   value:
                     kc_flg: 2
+        '400':
+          description: Bad Request - Invalid input
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid request body"
+              example:
+                error: "Invalid request body"
+        '500':
+          description: Internal Server Error - Something went wrong
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Internal server error"
+              example:
+                error: "Internal server error"
 servers:
   - url: https://v2vx0npl3f.execute-api.ap-northeast-1.amazonaws.com
     description: AWS API Gateway endpoint
