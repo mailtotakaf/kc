@@ -79,3 +79,15 @@
 <br><br>
 ### 500: エラー
 サーバーエラー
+<br><br>
+
+---
+
+## Postman動作確認
+
+https://v2vx0npl3f.execute-api.ap-northeast-1.amazonaws.com/dev/example
+
+POSTでリクエストを送信
+![alt text](image-1.png)
+
+---
