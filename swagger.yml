@@ -1,14 +1,14 @@
 openapi: 3.0.0
 info:
-  title: KC API
+  title: KC_API
   version: 1.0.0
-  description: API to get kc_flg.
+  description: Returns "kc_flg" based on the positions of 4 stones.
 paths:
   /dev/example:
     post:
-      summary: Process stones data
-      description: Accepts a set of stone coordinates and returns a status flag.
-      operationId: processStones
+      # summary: Process stones data
+      description: Returns "kc_flg" based on the positions of 4 stones.
+      # operationId: processStones
       requestBody:
         required: true
         content:
