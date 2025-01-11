@@ -88,7 +88,7 @@
 https://v2vx0npl3f.execute-api.ap-northeast-1.amazonaws.com/dev/example
 
 POSTでリクエストを送信
-![alt text](image-1.png)
+![alt text](img/image-1.png)
 
 ---
 
