@@ -87,7 +87,7 @@
 
 ## Postman動作確認
 
-https://wjgcov3bca.execute-api.ap-northeast-1.amazonaws.com/dev/example
+https://6dhxw65lpc.execute-api.ap-northeast-1.amazonaws.com/dev/example
 
 POSTでリクエストを送信
 ![alt text](img/image-1.png)

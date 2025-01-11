@@ -1,2 +1,4 @@
 .venv/*
 .aws-sam/*
+terraform/.terraform/*
+
