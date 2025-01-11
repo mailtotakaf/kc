@@ -52,22 +52,23 @@
 ## レスポンス
 
 ### 200: OK
-"kc_flg" が返却される。
-<br>
-<br>
-0： 通常時
+通常時
 ```json
 {
     "kc_flg": 0
 }
 ```
-1： リーチ
+<br/>
+
+リーチ
 ```json
 {
     "kc_flg": 1
 }
 ```
-2： 積み
+<br/>
+
+積み
 ```json
 {
     "kc_flg": 2
@@ -79,25 +80,27 @@
 <br><br>
 ### 500: エラー
 サーバーエラー
-<br><br>
 
+<br><br>
+<br><br>
 ---
 
 ## Postman動作確認
 
-https://v2vx0npl3f.execute-api.ap-northeast-1.amazonaws.com/dev/example
+https://wjgcov3bca.execute-api.ap-northeast-1.amazonaws.com/dev/example
 
 POSTでリクエストを送信
 ![alt text](img/image-1.png)
 
 ---
-
+<br><br>
 ## Swagger EditerでAPI仕様確認
 
 https://editor.swagger.io/
 \
 に swagger.yml を貼り付けて確認
 
+<br><br>
 ---
 ## Git Hub
 
