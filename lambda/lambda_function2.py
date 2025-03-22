@@ -1,5 +1,11 @@
+import boto3
 import json
 import kc_checker
+import time
+from datetime import datetime, timezone
+
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table('kc-table')
 
 
 def lambda_handler(event, context):
@@ -10,6 +16,23 @@ def lambda_handler(event, context):
         stones = body['stones']
         print("gid_uid_moves:", gid_uid_moves)
         print("stones:", stones)
+        created_at = datetime.now(timezone.utc).isoformat()  # ISO 8601形式のタイムスタンプ
+        ttl = int(time.time()) + 86400
+
+        try:
+            # DynamoDB への登録
+            table.put_item(
+                Item={
+                    'gid_uid_moves': gid_uid_moves,
+                    'created_at': created_at,
+                    'ttl': ttl,
+                    'stones': stones
+                }
+            )
+            print("Data written to DynamoDB successfully.")
+        except Exception as e:
+            print(f"Error writing to DynamoDB: {str(e)}")
+            # DynamoDBエラーでも処理を続行する
 
         stones_tuple = [(item["x"], item["y"]) for i, (key, item) in enumerate(stones.items())]
         print("stones_tuple:", stones_tuple)
