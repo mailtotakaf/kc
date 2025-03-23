@@ -1,0 +1,23 @@
+{
+    "gameid_moves": "20240322g123_m123",
+    "stones": {
+        "player1": {
+            "stone0": {"x": 1, "y": 0},
+            "stone1": {"x": 0, "y": 1},
+            "stone2": {"x": 2, "y": 1},
+            "stone3": {"x": 3, "y": 2}
+        },
+        "player2": {
+            "stone0": {"x": 0, "y": 0},
+            "stone1": {"x": 0, "y": 1},
+            "stone2": {"x": 1, "y": 0},
+            "stone3": {"x": 2, "y": 2}
+        },
+        "player3": {
+            "stone0": {"x": 1, "y": 0},
+            "stone1": {"x": 0, "y": 1},
+            "stone2": {"x": 2, "y": 1},
+            "stone3": {"x": 1, "y": 2}
+        }
+    }
+}

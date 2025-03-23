@@ -18,7 +18,7 @@ CORS_HEADERS = {
 def lambda_handler(event, context):
     try:
         body = json.loads(event['body'])
-        print("Received body:", body)
+        # print("Received body:", body)
 
         if isinstance(body, dict) and 'gameid_moves' in body and 'stones' in body:
             # パターン1: 全体に gameid_moves と stones が含まれる形式
@@ -46,24 +46,16 @@ def lambda_handler(event, context):
             
             print("stones:", stones)
 
-            player1_stones = stones["player1"]
-            player2_stones = stones["player2"]
+            kc_flg = {}
 
-            player1_stones_tuple = [(item["x"], item["y"]) for i, (key, item) in enumerate(player1_stones.items())]
-            print("player1_stones_tuple:", player1_stones_tuple)
-            player1_kc_flg = kc_checker.alert_on_square_or_pre_square(player1_stones_tuple)
-            print("player1_kc_flg:", player1_kc_flg)
+            for player, stone_dict in stones.items():
+                stones_tuple = [(item["x"], item["y"]) for key, item in stone_dict.items()]
+                print(f"{player}_stones_tuple:", stones_tuple)
 
-            player2_stones_tuple = [(item["x"], item["y"]) for i, (key, item) in enumerate(player2_stones.items())]
-            print("player2_stones_tuple:", player2_stones_tuple)
-            player2_kc_flg = kc_checker.alert_on_square_or_pre_square(player2_stones_tuple)
-            print("player2_kc_flg:", player2_kc_flg)
+                kc_result = kc_checker.alert_on_square_or_pre_square(stones_tuple)
+                print(f"{player}_kc_flg:", kc_result)
 
-            kc_flg = {
-                    "player1": player1_kc_flg,
-                    "player2": player2_kc_flg
-            }
-
+                kc_flg[player] = kc_result
         else:
             # パターン2: stones のみが直接来る形式
             stones = body
