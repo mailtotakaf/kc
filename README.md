@@ -94,7 +94,7 @@ POSTでリクエストを送信
 
 ---
 <br><br>
-## Swagger EditerでAPI仕様確認
+## Swagger EditerでAPI仕様確認（参考）
 
 https://editor.swagger.io/
 \
