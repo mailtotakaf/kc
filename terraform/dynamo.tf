@@ -1,11 +1,11 @@
-resource "aws_dynamodb_table" "kc-table" {
-  name         = "kc-table"
+resource "aws_dynamodb_table" "kc_stones" {
+  name         = "kc_stones"
   billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "gid_uid_moves"
+  hash_key     = "gameid_moves"
   range_key = "created_at"
 
   attribute {
-    name = "gid_uid_moves"
+    name = "gameid_moves"
     type = "S"
   }
 
@@ -22,6 +22,6 @@ resource "aws_dynamodb_table" "kc-table" {
 
   tags = {
     Environment = "dev"
-    Name        = "kc-table"
+    Name        = "kc-stones"
   }
 }
