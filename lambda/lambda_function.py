@@ -1,24 +1,34 @@
 import json
 import kc_checker
 
+CORS_HEADERS = {
+    "Content-Type": "application/json",
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
+}
 
 def lambda_handler(event, context):
     try:
-        stones = json.loads(event['body'])
-        stones_tuple = [(item["x"], item["y"]) for i, (key, item) in enumerate(stones.items())]
-        kc_flg = kc_checker.alert_on_square_or_pre_square(stones_tuple)
+        body = json.loads(event['body'])
 
-        CORS_HEADERS = {
-            "Content-Type": "application/json",
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Headers": "Content-Type",
-            "Access-Control-Allow-Methods": "OPTIONS,POST,GET"
-        }
-    except (KeyError, json.JSONDecodeError):
+        gameid_moves = body["gameid_moves"]
+        stones_data = body["stones"]
+
+        kc_flg = {}
+
+        for player, stones in stones_data.items():
+            # 各プレイヤーの石を (x, y) タプルに変換
+            stones_tuple = [(stone["x"], stone["y"]) for stone in stones.values()]
+            # プレイヤーごとにチェック
+            kc_flg[player] = kc_checker.alert_on_square_or_pre_square(stones_tuple)
+
+    except (KeyError, json.JSONDecodeError) as e:
+        print(f"KeyError or JSONDecodeError: {str(e)}")
         return {
             "statusCode": 400,
             "headers": CORS_HEADERS,
-            "body": json.dumps({"error": "Invalid request stones"})
+            "body": json.dumps({"error": "Invalid request structure"})
         }
     except Exception as e:
         print(f"Unexpected error: {str(e)}")
@@ -31,5 +41,9 @@ def lambda_handler(event, context):
     return {
         "statusCode": 200,
         "headers": CORS_HEADERS,
-        "body": json.dumps({"kc_flg": kc_flg})
+        "body": json.dumps({
+            "gameid_moves": gameid_moves,
+            "kc_flg": kc_flg,
+            "stones": stones_data
+        })
     }
