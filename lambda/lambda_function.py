@@ -28,14 +28,19 @@ def lambda_handler(event, context):
         else:
             # パターン2: stones のみが直接来る形式
             stones = body
-            gameid_moves = None
-            stones_data = None
 
             print("stones:", stones)
             stones_tuple = [(item["x"], item["y"]) for i, (key, item) in enumerate(stones.items())]
             print("stones_tuple:", stones_tuple)
 
             kc_flg = kc_checker.alert_on_square_or_pre_square(stones_tuple)
+            return {
+                "statusCode": 200,
+                "headers": CORS_HEADERS,
+                "body": json.dumps({
+                    "kc_flg": kc_flg
+                })
+            }
 
     except (KeyError, json.JSONDecodeError) as e:
         print(f"KeyError or JSONDecodeError: {str(e)}")
